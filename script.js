@@ -14,21 +14,21 @@ var mouseposb;
 var friction = 0.1;
 var elasticityFloor = 0.6;
 var elasticityWalls = 0.75;
-var restitution = 0.5;
+var restitution = 0.9;
 
 // Control ball variables
 var initialWidth1 = 200;
-var initialHeight1 = 350;
-var initialVelX1 = 12;
+var initialHeight1 = 550;
+var initialVelX1 = -24;
 var initialVelY1 = 0;
 var accelX1 = 0;
 var accelY1 = 0.75;
-var mass1 = 1;
-var diameter1 = 40;
+var mass1 = 10;
+var diameter1 = 80;
 
 var initialWidth2 = 400;
 var initialHeight2 = 550;
-var initialVelX2 = -8;
+var initialVelX2 = 12;
 var initialVelY2 = 0;
 var accelX2 = 0;
 var accelY2 = 0.75;
@@ -43,18 +43,16 @@ function setup() {
   createCanvas(xbound, ybound);
   down = createVector(0,1);
 	ctrl = new BallControl();
-  print("mag of 1,-1 is ", createVector(1,-1).mag());
-  print("angle of 1,-1 with +x is ", createVector(-1,0).angleBetween(createVector(0,1))/Math.PI);
 }
 
-var Ball = function(position, velocity, acceleration, diameter) {
+var Ball = function(position, velocity, acceleration, mass, diameter) {
   this.start = position.copy();
   this.pos = position.copy();
-  this.vel = velocity.copy();
-  this.acc = acceleration.copy();
+	this.vel = velocity.copy();
+	this.acc = acceleration.copy();
   this.accSaved = acceleration.copy();
-  this.mass = diameter/2;
-  this.d = diameter;
+  this.mass = mass;
+	this.d = diameter;
   this.bounceFloor = false;
   this.onFloor = false;
   this.bounceWall = false;
@@ -139,7 +137,6 @@ Ball.prototype.checkBall = function(b) {
   var bmassratio = b.mass/(b.mass + this.mass);
 
   if (this.pos.dist(b.pos)<this.d/2+b.d/2) {
-    print("Checking collision with this ball");
     this.collided = true;
     b.collided = true;
 /*
@@ -175,6 +172,8 @@ Ball.prototype.checkBall = function(b) {
 */
     var normal = createVector(this.pos.x - b.pos.x, this.pos.y - b.pos.y);
     var theta = normal.angleBetween(down);
+    print(theta, "sin(theta)=", Math.sin(theta), "cos(theta)=", Math.cos(theta));
+    print("Now, ", theta, "realsin(theta)=", realsin(theta), "realcos(theta)=", realcos(theta));
     //print(theta);
     /*
     this.vel.x += (1 - restitution) * this.accSaved.y * ((this.mass * Math.sin(Math.PI + theta)^2 - this.mass * (Math.sin(Math.PI + theta)*Math.cos(Math.PI + theta))));
@@ -192,10 +191,20 @@ Ball.prototype.checkBall = function(b) {
     b.pos.x += b.vel.x;
     b.pos.y += b.vel.y;
     */
-    this.vel.y = (this.mass * this.accSaved.y * (Math.cos(theta)^2) - (this.mass * this.accSaved.y * Math.cos(theta) * Math.sin(theta)));
+    b.vel.y = thismassratio * (this.mass * this.accSaved.y * (realcos(theta)^2) - (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
     if (this.pos.y < b.pos.y) this.vel.y *= -1;
-    this.vel.x = (this.mass * this.accSaved.y * (Math.sin(theta)^2) + (this.mass * this.accSaved.y * Math.cos(theta) * Math.sin(theta)));
+    b.vel.x = thismassratio * (this.mass * this.accSaved.y * (realsin(theta)^2) + (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
     if (this.pos.x < b.pos.x) this.vel.x *= -1;
+
+    this.vel.y = bmassratio * (b.mass * b.accSaved.y * (realcos(theta)^2) - (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
+    if (b.pos.y < this.pos.y) this.vel.y *= -1;
+    this.vel.x = bmassratio * (b.mass * b.accSaved.y * (realsin(theta)^2) + (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
+    if (b.pos.x < this.pos.x) b.vel.x *= -1;
+
+    this.pos.x += this.vel.x;
+    this.pos.y += this.vel.y;
+    b.pos.x += b.vel.x;
+    b.pos.y += b.vel.y;
   }
 }
 
@@ -203,7 +212,7 @@ Ball.prototype.run = function() {
   this.update();
   for (var i = 0; i < ctrl.balls.length; i++) {
     //print("Ball", i);
-    //if (this.collided) continue;
+    if (this.collided) continue;
     var b = ctrl.balls[i];
     if (b.pos.equals(this.pos)) continue;
     else this.checkBall(b);
@@ -220,12 +229,11 @@ Ball.prototype.run = function() {
   //if(!this.collided)
   this.display();
   this.collided = false;
-
 }
 
 var BallControl = function() {
-	this.balls = [new Ball(createVector(initialWidth1,ybound-initialHeight1), createVector(initialVelX1,initialVelY1), createVector(accelX1,accelY1), diameter1),
-                new Ball(createVector(initialWidth2,ybound-initialHeight2), createVector(initialVelX2,initialVelY2), createVector(accelX2,accelY2), diameter2)];
+	this.balls = [new Ball(createVector(initialWidth1,ybound-initialHeight1), createVector(initialVelX1,initialVelY1), createVector(accelX1,accelY1), mass1, diameter1),
+                new Ball(createVector(initialWidth2,ybound-initialHeight2), createVector(initialVelX2,initialVelY2), createVector(accelX2,accelY2), mass2, diameter2)];
 }
 
 BallControl.prototype.addBall = function(ball) {
@@ -268,7 +276,7 @@ function draw() {
     ang = diffvec.angleBetween(createVector(0,1));
 
 
-    newball = new Ball(mouseposb, diffvec.mult(.1), createVector(0,accelY1), sizeofnew);
+    newball = new Ball(mouseposb, diffvec.mult(.1), createVector(0,accelY1), 1, sizeofnew);
     ctrl.balls.push(newball);
 
     sizeofnew=0;
@@ -280,4 +288,18 @@ function mousePressed(){
   mousexpos = mouseX; //Have to recreate vars cause of java referencing :(
   mouseypos = mouseY;
   mouseposb = createVector(mousexpos, mouseypos); //Initial mouse pos
+}
+
+function realsin(x) {
+  if (x == 0 || x == Math.PI || x == 2 * Math.PI) return 0;
+  else if (x == Math.PI/2) return 1;
+  else if (x == 3*Math.PI/2) return -1;
+  else return Math.sin(x);
+}
+
+function realcos(x) {
+  if (x == 0 || x == 2 * Math.PI) return 1;
+  else if (x == Math.PI/2 || x == 3*Math.PI/2) return 0;
+  else if (x == Math.PI) return -1;
+  else return Math.cos(x);
 }
