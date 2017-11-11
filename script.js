@@ -61,7 +61,7 @@ var Ball = function(position, velocity, acceleration, mass, diameter) {
   this.maxEnergy = (this.mass * this.acc.y * this.floorDist) + this.initialKinetic;
   this.termVel = Math.sqrt(((2 * this.acc.y * this.floorDist) + (2 * this.initialKinetic))/this.mass);
   this.collided = false;
-  this.colour = random(1,255);
+  this.colour = RGB(random(1,255),random(1,255),random(1,255));
 }
 
 // Occurs when ball reaches peak of arc: update new GPE and terminal velocity
@@ -73,7 +73,7 @@ Ball.prototype.stationaryPoint = function() {
 }
 
 Ball.prototype.display = function() {
-  fill(this.colour, (2*this.colour)%255, (0.5*this.colour)%255);
+  fill(this.colour);
   //if (this.acc.y == 0) fill(255,0,0);
 	noStroke();
 	ellipse(this.pos.x, this.pos.y, this.d, this.d);
