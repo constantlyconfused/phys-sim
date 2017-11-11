@@ -75,6 +75,7 @@ Ball.prototype.stationaryPoint = function() {
 }
 
 Ball.prototype.display = function() {
+	print(this.cr, this.cg, this.cb);
 	fill(this.cr,this.cg,this.cb);
   //if (this.acc.y == 0) fill(255,0,0);
 	noStroke();
