@@ -14,7 +14,7 @@ var mouseposb;
 var friction = 0.1;
 var elasticityFloor = 0.6;
 var elasticityWalls = 0.75;
-var restitution = 0.9;
+var restitution = 0.75;
 
 // Control ball variables
 var initialWidth1 = 200;
@@ -59,7 +59,9 @@ var Ball = function(position, velocity, acceleration, diameter) {
   this.maxEnergy = (this.mass * this.acc.y * this.floorDist) + this.initialKinetic;
   this.termVel = Math.sqrt(((2 * this.acc.y * this.floorDist) + (2 * this.initialKinetic))/this.mass);
   this.collided = false;
-  this.colour = random(1,255);
+  this.cr = random(1,255);
+  this.cg = random(1,255);
+  this.cb = random(1,255);
 }
 
 // Occurs when ball reaches peak of arc: update new GPE and terminal velocity
@@ -71,7 +73,7 @@ Ball.prototype.stationaryPoint = function() {
 }
 
 Ball.prototype.display = function() {
-  fill(this.colour, (2*this.colour)%255, (0.5*this.colour)%255);
+  fill(this.cr,this.cg,this.cb);
   //if (this.acc.y == 0) fill(255,0,0);
 	noStroke();
 	ellipse(this.pos.x, this.pos.y, this.d, this.d);
@@ -189,16 +191,16 @@ Ball.prototype.checkBall = function(b) {
     b.pos.x += b.vel.x;
     b.pos.y += b.vel.y;
     */
-    b.vel.y = /*thismassratio * */(this.mass * this.accSaved.y * (realcos(theta)^2) - (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
+    b.vel.y = /*thismassratio * */restitution * (this.mass * this.accSaved.y * (realcos(theta)^2) - (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
     if (b.onFloor) b.vel.y = Math.floor(b.vel.y);
     if (this.pos.y > b.pos.y) b.vel.y *= -1;
-    b.vel.x = /*thismassratio * */(this.mass * this.accSaved.y * (realsin(theta)^2) + (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
+    b.vel.x = /*thismassratio * */restitution * (this.mass * this.accSaved.y * (realsin(theta)^2) + (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
     if (this.pos.x > b.pos.x) b.vel.x *= -1;
 
-    this.vel.y = /*bmassratio * */(b.mass * b.accSaved.y * (realcos(theta)^2) - (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
+    this.vel.y = /*bmassratio * */restitution * (b.mass * b.accSaved.y * (realcos(theta)^2) - (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
     if (this.onFloor) this.vel.y = Math.floor(this.vel.y);
     if (b.pos.y > this.pos.y) this.vel.y *= -1;
-    this.vel.x = /*bmassratio * */(b.mass * b.accSaved.y * (realsin(theta)^2) + (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
+    this.vel.x = /*bmassratio * */restitution * (b.mass * b.accSaved.y * (realsin(theta)^2) + (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
     if (b.pos.x > this.pos.x) this.vel.x *= -1;
 
     this.pos.x += this.vel.x;
