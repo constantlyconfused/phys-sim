@@ -192,14 +192,14 @@ Ball.prototype.checkBall = function(b) {
     b.pos.y += b.vel.y;
     */
     b.vel.y = thismassratio * (this.mass * this.accSaved.y * (realcos(theta)^2) - (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
-    if (this.pos.y < b.pos.y) this.vel.y *= -1;
+    if (this.pos.y > b.pos.y) b.vel.y *= -1;
     b.vel.x = thismassratio * (this.mass * this.accSaved.y * (realsin(theta)^2) + (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
-    if (this.pos.x < b.pos.x) this.vel.x *= -1;
+    if (this.pos.x > b.pos.x) b.vel.x *= -1;
 
     this.vel.y = bmassratio * (b.mass * b.accSaved.y * (realcos(theta)^2) - (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
-    if (b.pos.y < this.pos.y) this.vel.y *= -1;
+    if (b.pos.y > this.pos.y) this.vel.y *= -1;
     this.vel.x = bmassratio * (b.mass * b.accSaved.y * (realsin(theta)^2) + (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
-    if (b.pos.x < this.pos.x) b.vel.x *= -1;
+    if (b.pos.x > this.pos.x) this.vel.x *= -1;
 
     this.pos.x += this.vel.x;
     this.pos.y += this.vel.y;
@@ -272,7 +272,7 @@ function draw() {
     ydiff = mouseposb.y - mouseposa.y;
     diffvec = createVector(xdiff, ydiff);
 
-    magn = mouseposb.dist(mouseposa); //Euclidian distance between the initial mouse pos, and final mouse pos
+    magn = mouseposb.dist(mouseposa); //Euclidean distance between the initial mouse pos, and final mouse pos
     ang = diffvec.angleBetween(createVector(0,1));
 
 
