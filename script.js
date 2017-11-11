@@ -18,8 +18,8 @@ var restitution = 0.5;
 
 // Control ball variables
 var initialWidth1 = 200;
-var initialHeight1 = 550;
-var initialVelX1 = 8;
+var initialHeight1 = 350;
+var initialVelX1 = 12;
 var initialVelY1 = 0;
 var accelX1 = 0;
 var accelY1 = 0.75;
@@ -43,6 +43,8 @@ function setup() {
   createCanvas(xbound, ybound);
   down = createVector(0,1);
 	ctrl = new BallControl();
+  print("mag of 1,-1 is ", createVector(1,-1).mag());
+  print("angle of 1,-1 with +x is ", createVector(-1,0).angleBetween(createVector(0,1))/Math.PI);
 }
 
 var Ball = function(position, velocity, acceleration, mass, diameter) {
@@ -61,9 +63,7 @@ var Ball = function(position, velocity, acceleration, mass, diameter) {
   this.maxEnergy = (this.mass * this.acc.y * this.floorDist) + this.initialKinetic;
   this.termVel = Math.sqrt(((2 * this.acc.y * this.floorDist) + (2 * this.initialKinetic))/this.mass);
   this.collided = false;
-  this.cr = random(1,255);
-  this.cg = random(1,255);
-  this.cb = random(1,255);
+  this.colour = random(1,255);
 }
 
 // Occurs when ball reaches peak of arc: update new GPE and terminal velocity
@@ -75,8 +75,7 @@ Ball.prototype.stationaryPoint = function() {
 }
 
 Ball.prototype.display = function() {
-	print(this.cr, this.cg, this.cb);
-	fill(this.cr,this.cg,this.cb);
+  fill(this.colour, (2*this.colour)%255, (0.5*this.colour)%255);
   //if (this.acc.y == 0) fill(255,0,0);
 	noStroke();
 	ellipse(this.pos.x, this.pos.y, this.d, this.d);
@@ -183,12 +182,20 @@ Ball.prototype.checkBall = function(b) {
     b.vel.x += (1 - restitution) * b.accSaved.y * ((b.mass * Math.sin(theta)^2 - b.mass * (Math.sin(theta)*Math.cos(theta))));
     b.vel.y += (1 - restitution) * b.accSaved.y * (((Math.sin(theta)*Math.cos(theta)) * b.mass) + b.mass * (Math.cos(theta)^2));
     */
+    /*
     this.vel.x += Math.cos(createVector(-1,0).angleBetween(normal)) * bmassratio * this.accSaved.y * Math.sin(theta);
     this.vel.y += Math.cos(createVector(-1,0).angleBetween(normal)) * bmassratio * this.accSaved.y * Math.cos(theta);
     if (isNaN(this.vel.x)) this.vel.x = 0; // Sometimes the numbers are too small
     if (isNaN(this.vel.y)) this.vel.y = 0; // Sometimes the numbers are too small
     this.pos.x += this.vel.x;
     this.pos.y += this.vel.y;
+    b.pos.x += b.vel.x;
+    b.pos.y += b.vel.y;
+    */
+    this.vel.y = (this.mass * this.accSaved.y * (Math.cos(theta)^2) - (this.mass * this.accSaved.y * Math.cos(theta) * Math.sin(theta)));
+    if (this.pos.y < b.pos.y) this.vel.y *= -1;
+    this.vel.x = (this.mass * this.accSaved.y * (Math.sin(theta)^2) + (this.mass * this.accSaved.y * Math.cos(theta) * Math.sin(theta)));
+    if (this.pos.x < b.pos.x) this.vel.x *= -1;
   }
 }
 
@@ -196,7 +203,7 @@ Ball.prototype.run = function() {
   this.update();
   for (var i = 0; i < ctrl.balls.length; i++) {
     //print("Ball", i);
-    if (this.collided) continue;
+    //if (this.collided) continue;
     var b = ctrl.balls[i];
     if (b.pos.equals(this.pos)) continue;
     else this.checkBall(b);
