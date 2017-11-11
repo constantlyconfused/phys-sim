@@ -73,7 +73,8 @@ Ball.prototype.stationaryPoint = function() {
 }
 
 Ball.prototype.display = function() {
-  fill(this.colour);
+  	print(this.colour);
+	fill(this.colour);
   //if (this.acc.y == 0) fill(255,0,0);
 	noStroke();
 	ellipse(this.pos.x, this.pos.y, this.d, this.d);
