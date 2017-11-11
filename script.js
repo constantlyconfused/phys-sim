@@ -47,14 +47,14 @@ function setup() {
   print("angle of 1,-1 with +x is ", createVector(-1,0).angleBetween(createVector(0,1))/Math.PI);
 }
 
-var Ball = function(position, velocity, acceleration, mass, diameter) {
+var Ball = function(position, velocity, acceleration, diameter) {
   this.start = position.copy();
   this.pos = position.copy();
-	this.vel = velocity.copy();
-	this.acc = acceleration.copy();
+  this.vel = velocity.copy();
+  this.acc = acceleration.copy();
   this.accSaved = acceleration.copy();
-  this.mass = mass;
-	this.d = diameter;
+  this.mass = diameter/2;
+  this.d = diameter;
   this.bounceFloor = false;
   this.onFloor = false;
   this.bounceWall = false;
@@ -224,8 +224,8 @@ Ball.prototype.run = function() {
 }
 
 var BallControl = function() {
-	this.balls = [new Ball(createVector(initialWidth1,ybound-initialHeight1), createVector(initialVelX1,initialVelY1), createVector(accelX1,accelY1), mass1, diameter1),
-                new Ball(createVector(initialWidth2,ybound-initialHeight2), createVector(initialVelX2,initialVelY2), createVector(accelX2,accelY2), mass2, diameter2)];
+	this.balls = [new Ball(createVector(initialWidth1,ybound-initialHeight1), createVector(initialVelX1,initialVelY1), createVector(accelX1,accelY1), diameter1),
+                new Ball(createVector(initialWidth2,ybound-initialHeight2), createVector(initialVelX2,initialVelY2), createVector(accelX2,accelY2), diameter2)];
 }
 
 BallControl.prototype.addBall = function(ball) {
@@ -268,7 +268,7 @@ function draw() {
     ang = diffvec.angleBetween(createVector(0,1));
 
 
-    newball = new Ball(mouseposb, diffvec.mult(.1), createVector(0,accelY1), 1, sizeofnew);
+    newball = new Ball(mouseposb, diffvec.mult(.1), createVector(0,accelY1), sizeofnew);
     ctrl.balls.push(newball);
 
     sizeofnew=0;
