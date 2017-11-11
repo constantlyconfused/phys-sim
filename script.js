@@ -23,8 +23,7 @@ var initialVelX1 = -24;
 var initialVelY1 = 0;
 var accelX1 = 0;
 var accelY1 = 0.75;
-var mass1 = 10;
-var diameter1 = 80;
+var diameter1 = 40;
 
 var initialWidth2 = 400;
 var initialHeight2 = 550;
@@ -32,7 +31,6 @@ var initialVelX2 = 12;
 var initialVelY2 = 0;
 var accelX2 = 0;
 var accelY2 = 0.75;
-var mass2 = 1;
 var diameter2 = 40;
 
 // Initialise control for balls
@@ -45,13 +43,13 @@ function setup() {
 	ctrl = new BallControl();
 }
 
-var Ball = function(position, velocity, acceleration, mass, diameter) {
+var Ball = function(position, velocity, acceleration, diameter) {
   this.start = position.copy();
   this.pos = position.copy();
 	this.vel = velocity.copy();
 	this.acc = acceleration.copy();
   this.accSaved = acceleration.copy();
-  this.mass = mass;
+  this.mass = diameter/40;
 	this.d = diameter;
   this.bounceFloor = false;
   this.onFloor = false;
@@ -191,14 +189,14 @@ Ball.prototype.checkBall = function(b) {
     b.pos.x += b.vel.x;
     b.pos.y += b.vel.y;
     */
-    b.vel.y = thismassratio * (this.mass * this.accSaved.y * (realcos(theta)^2) - (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
+    b.vel.y = /*thismassratio * */(this.mass * this.accSaved.y * (realcos(theta)^2) - (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
     if (this.pos.y > b.pos.y) b.vel.y *= -1;
-    b.vel.x = thismassratio * (this.mass * this.accSaved.y * (realsin(theta)^2) + (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
+    b.vel.x = /*thismassratio * */(this.mass * this.accSaved.y * (realsin(theta)^2) + (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
     if (this.pos.x > b.pos.x) b.vel.x *= -1;
 
-    this.vel.y = bmassratio * (b.mass * b.accSaved.y * (realcos(theta)^2) - (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
+    this.vel.y = /*bmassratio * */(b.mass * b.accSaved.y * (realcos(theta)^2) - (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
     if (b.pos.y > this.pos.y) this.vel.y *= -1;
-    this.vel.x = bmassratio * (b.mass * b.accSaved.y * (realsin(theta)^2) + (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
+    this.vel.x = /*bmassratio * */(b.mass * b.accSaved.y * (realsin(theta)^2) + (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
     if (b.pos.x > this.pos.x) this.vel.x *= -1;
 
     this.pos.x += this.vel.x;
@@ -232,8 +230,8 @@ Ball.prototype.run = function() {
 }
 
 var BallControl = function() {
-	this.balls = [new Ball(createVector(initialWidth1,ybound-initialHeight1), createVector(initialVelX1,initialVelY1), createVector(accelX1,accelY1), mass1, diameter1),
-                new Ball(createVector(initialWidth2,ybound-initialHeight2), createVector(initialVelX2,initialVelY2), createVector(accelX2,accelY2), mass2, diameter2)];
+	this.balls = [new Ball(createVector(initialWidth1,ybound-initialHeight1), createVector(initialVelX1,initialVelY1), createVector(accelX1,accelY1), diameter1),
+                new Ball(createVector(initialWidth2,ybound-initialHeight2), createVector(initialVelX2,initialVelY2), createVector(accelX2,accelY2), diameter2)];
 }
 
 BallControl.prototype.addBall = function(ball) {
@@ -276,7 +274,7 @@ function draw() {
     ang = diffvec.angleBetween(createVector(0,1));
 
 
-    newball = new Ball(mouseposb, diffvec.mult(.1), createVector(0,accelY1), 1, sizeofnew);
+    newball = new Ball(mouseposb, diffvec.mult(.1), createVector(0,accelY1), sizeofnew);
     ctrl.balls.push(newball);
 
     sizeofnew=0;
