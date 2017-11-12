@@ -139,6 +139,12 @@ Ball.prototype.checkBall = function(b) {
   if (this.pos.dist(b.pos)<this.d/2+b.d/2) {
     this.collided = true;
     b.collided = true;
+    var oldxvel = this.vel.x;
+    var oldyvel = this.vel.y;
+    var bStationary;
+    if (b.onFloor) bStationary = true;
+    else bStationary = false;
+    print("is b stationary?", bStationary);
 /*
     if (this.pos.x >= b.pos.x) {
         // Need to split into head on vs. complementary
@@ -172,8 +178,8 @@ Ball.prototype.checkBall = function(b) {
 */
     var normal = createVector(this.pos.x - b.pos.x, this.pos.y - b.pos.y);
     var theta = normal.angleBetween(down);
-    print(theta, "sin(theta)=", Math.sin(theta), "cos(theta)=", Math.cos(theta));
-    print("Now, ", theta, "realsin(theta)=", realsin(theta), "realcos(theta)=", realcos(theta));
+    //print(theta, "sin(theta)=", Math.sin(theta), "cos(theta)=", Math.cos(theta));
+    //print("Now, ", theta, "realsin(theta)=", realsin(theta), "realcos(theta)=", realcos(theta));
     //print(theta);
     /*
     this.vel.x += (1 - restitution) * this.accSaved.y * ((this.mass * Math.sin(Math.PI + theta)^2 - this.mass * (Math.sin(Math.PI + theta)*Math.cos(Math.PI + theta))));
@@ -198,9 +204,11 @@ Ball.prototype.checkBall = function(b) {
     if (this.pos.x > b.pos.x) b.vel.x *= -1;
 
     this.vel.y = /*bmassratio * */restitution * (b.mass * b.accSaved.y * (realcos(theta)^2) - (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
+    if (bStationary && Math.abs(this.vel.y) > Math.abs(oldyvel * restitution)) this.vel.y = Math.abs(oldyvel) * (this.vel.y/Math.abs(this.vel.y));
     if (this.onFloor) this.vel.y = Math.floor(this.vel.y);
     if (b.pos.y > this.pos.y) this.vel.y *= -1;
     this.vel.x = /*bmassratio * */restitution * (b.mass * b.accSaved.y * (realsin(theta)^2) + (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
+    if (bStationary && Math.abs(this.vel.x) > Math.abs(oldxvel * restitution)) this.vel.x = Math.abs(oldxvel) * (this.vel.x/Math.abs(this.vel.x));
     if (b.pos.x > this.pos.x) this.vel.x *= -1;
 
     this.pos.x += this.vel.x;
@@ -261,7 +269,7 @@ function draw() {
 
   if(mouseIsPressed){
     sizeofnew++;
-    print(sizeofnew);
+    //print(sizeofnew);
     fill(255);
     ellipse(mouseposb.x, mouseposb.y, sizeofnew);
     stroke(255);
