@@ -95,7 +95,6 @@ Ball.prototype.update = function() {
   // Sort out y velocity
   if (this.vel.y == 0 || (this.vel.y < 0 && this.vel.y + this.acc.y > 0)) this.stationaryPoint(); // detect stationary points
   this.pos.add(this.vel);
-  //if (Math.abs(this.vel.y + this.acc.y) <= this.termVel) this.vel.add(this.acc); // always stay under the terminal velocity
   if (Math.abs(this.vel.y + this.acc.y) >= this.termVel) {
     this.vel.y = this.termVel * (this.vel.y/Math.abs(this.vel.y));
     this.acc.y = 0;
@@ -144,71 +143,20 @@ Ball.prototype.checkBall = function(b) {
     var bStationary;
     if (b.onFloor) bStationary = true;
     else bStationary = false;
-    print("is b stationary?", bStationary);
-/*
-    if (this.pos.x >= b.pos.x) {
-        // Need to split into head on vs. complementary
-        // Energy conservation?
-      thisxnew = this.pos.x + ((this.d/2 + b.d/2) - (this.pos.x - b.pos.x))/2;
-      bxnew = b.pos.x - ((this.d/2 + b.d/2) - (this.pos.x - b.pos.x))/2;
-    } else {
-      bxnew = b.pos.x + ((this.d/2 + b.d/2) - (b.pos.x - this.pos.x))/2;
-      thisxnew = this.pos.x - ((this.d/2 + b.d/2) - (b.pos.x - this.pos.x))/2;
-    }
-    //thisxvel = -1 * this.vel.x * (1-restitution) * thismassratio;
-    //bxvel = -1 * b.vel.x * (1-restitution) * bmassratio;
-    if (this.pos.y >= b.pos.y) {
-      thisynew = this.pos.y + ((this.d/2 + b.d/2) - (this.pos.y - b.pos.y))/2;
-      bynew = b.pos.y - ((this.d/2 + b.d/2) - (this.pos.y - b.pos.y))/2;
-    } else {
-      bynew = b.pos.y + ((this.d/2 + b.d/2) - (b.pos.y - this.pos.y))/2;
-      thisynew = this.pos.y - ((this.d/2 + b.d/2) - (b.pos.y - this.pos.y))/2;
-    }
-    //thisyvel = -1 * this.vel.y * (1-restitution) * thismassratio;
-    //byvel = -1 * b.vel.y * (1-restitution) * bmassratio;
-
-    this.pos.x = thisxnew;
-    if (!b.onFloor) this.pos.y = thisynew;
-    b.pos.x = bxnew;
-    if (!b.onFloor) b.pos.y = bynew;
-    //this.vel.x = thisxvel;
-    //b.vel.x = bxvel;
-    //this.vel.y = thisyvel;
-    //b.vel.y = byvel;
-*/
     var normal = createVector(this.pos.x - b.pos.x, this.pos.y - b.pos.y);
     var theta = normal.angleBetween(down);
-    //print(theta, "sin(theta)=", Math.sin(theta), "cos(theta)=", Math.cos(theta));
-    //print("Now, ", theta, "realsin(theta)=", realsin(theta), "realcos(theta)=", realcos(theta));
-    //print(theta);
-    /*
-    this.vel.x += (1 - restitution) * this.accSaved.y * ((this.mass * Math.sin(Math.PI + theta)^2 - this.mass * (Math.sin(Math.PI + theta)*Math.cos(Math.PI + theta))));
-    this.vel.y += (1 - restitution) * this.accSaved.y * (((Math.sin(Math.PI + theta)*Math.cos(Math.PI + theta)) * this.mass) + this.mass * (Math.cos(Math.PI + theta)^2));
-    b.vel.x += (1 - restitution) * b.accSaved.y * ((b.mass * Math.sin(theta)^2 - b.mass * (Math.sin(theta)*Math.cos(theta))));
-    b.vel.y += (1 - restitution) * b.accSaved.y * (((Math.sin(theta)*Math.cos(theta)) * b.mass) + b.mass * (Math.cos(theta)^2));
-    */
-    /*
-    this.vel.x += Math.cos(createVector(-1,0).angleBetween(normal)) * bmassratio * this.accSaved.y * Math.sin(theta);
-    this.vel.y += Math.cos(createVector(-1,0).angleBetween(normal)) * bmassratio * this.accSaved.y * Math.cos(theta);
-    if (isNaN(this.vel.x)) this.vel.x = 0; // Sometimes the numbers are too small
-    if (isNaN(this.vel.y)) this.vel.y = 0; // Sometimes the numbers are too small
-    this.pos.x += this.vel.x;
-    this.pos.y += this.vel.y;
-    b.pos.x += b.vel.x;
-    b.pos.y += b.vel.y;
-    */
-    b.vel.y = /*thismassratio * */restitution * (this.mass * this.accSaved.y * (realcos(theta)^2) - (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
+    b.vel.y = restitution * (this.mass * this.accSaved.y * (realcos(theta)^2) - (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
     if (b.onFloor) b.vel.y = Math.floor(b.vel.y);
     if (this.pos.y > b.pos.y) b.vel.y *= -1;
-    b.vel.x = /*thismassratio * */restitution * (this.mass * this.accSaved.y * (realsin(theta)^2) + (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
+    b.vel.x = restitution * (this.mass * this.accSaved.y * (realsin(theta)^2) + (this.mass * this.accSaved.y * realcos(theta) * realsin(theta)));
     if (this.pos.x > b.pos.x) b.vel.x *= -1;
 
-    this.vel.y = /*bmassratio * */restitution * (b.mass * b.accSaved.y * (realcos(theta)^2) - (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
-    if (bStationary && Math.abs(this.vel.y) > Math.abs(oldyvel * restitution)) this.vel.y = Math.abs(oldyvel) * (this.vel.y/Math.abs(this.vel.y));
+    this.vel.y = restitution * (b.mass * b.accSaved.y * (realcos(theta)^2) - (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
+    if (bStationary && Math.abs(this.vel.y) > Math.abs(oldyvel) && oldyvel != 0) this.vel.y = Math.abs(oldyvel*restitution) * (this.vel.y/Math.abs(this.vel.y));
     if (this.onFloor) this.vel.y = Math.floor(this.vel.y);
     if (b.pos.y > this.pos.y) this.vel.y *= -1;
-    this.vel.x = /*bmassratio * */restitution * (b.mass * b.accSaved.y * (realsin(theta)^2) + (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
-    if (bStationary && Math.abs(this.vel.x) > Math.abs(oldxvel * restitution)) this.vel.x = Math.abs(oldxvel) * (this.vel.x/Math.abs(this.vel.x));
+    this.vel.x = restitution * (b.mass * b.accSaved.y * (realsin(theta)^2) + (b.mass * b.accSaved.y * realcos(theta) * realsin(theta)));
+    if (bStationary && Math.abs(this.vel.x) > Math.abs(oldxvel) && oldxvel != 0) this.vel.x = Math.abs(oldxvel*restitution) * (this.vel.x/Math.abs(this.vel.x));
     if (b.pos.x > this.pos.x) this.vel.x *= -1;
 
     this.pos.x += this.vel.x;
@@ -226,17 +174,9 @@ Ball.prototype.run = function() {
     var b = ctrl.balls[i];
     if (b.pos.equals(this.pos)) continue;
     else this.checkBall(b);
-/*
-    stroke(0,255,0);
-    strokeWeight(1);
-    line(this.pos.x, this.pos.y, b.pos.x, b.pos.y);
-    var down = createVector(0,100);
-    line(this.pos.x, this.pos.y, this.pos.x+down.x, this.pos.y+down.y);
-*/
   }
 	this.checkFloor();
   this.checkWalls();
-  //if(!this.collided)
   this.display();
   this.collided = false;
 }
