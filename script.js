@@ -1,3 +1,14 @@
+/*
+
+----  KNOWN BUGS ----
+o   Balls will not rest on top of each other
+o   Collisions do not work properly when firing a small ball dwonwards onto a large, stationary balls
+o   Momentum is not conserved - large, fast masses turn around when colliding with small, light masses
+o   Some balls are very similar to background colour
+o   Very unstable for large number of grounded balls
+
+*/
+
 // Set variables to control room size and ground depth
 var xbound = 600;
 var ybound = 600;
@@ -12,9 +23,10 @@ var mouseposb;
 
 // Control global variables
 var friction = 0.1;
+
 var elasticityFloor = 0.6;
 var elasticityWalls = 0.75;
-var restitution = 0.75;
+var restitution = 0.5;
 
 // Control ball variables
 var initialWidth1 = 200;
@@ -62,6 +74,7 @@ var Ball = function(position, velocity, acceleration, diameter) {
   this.cr = random(1,255);
   this.cg = random(1,255);
   this.cb = random(1,255);
+  this.momentum = this.vel.mag() * this.mass;
 }
 
 // Occurs when ball reaches peak of arc: update new GPE and terminal velocity
@@ -124,14 +137,6 @@ Ball.prototype.checkWalls = function() {
 }
 
 Ball.prototype.checkBall = function(b) {
-  var thisxnew = this.pos.x;
-  var bxnew = b.pos.x;
-  var thisynew = this.pos.y;
-  var bynew = b.pos.y;
-  var thisxvel = this.vel.x;
-  var bxvel = b.vel.x;
-  var thisyvel = this.vel.y;
-  var byvel = b.vel.y;
   var thismassratio = this.mass/(b.mass + this.mass);
   var bmassratio = b.mass/(b.mass + this.mass);
 
